@@ -1,0 +1,117 @@
+﻿@{
+    ViewData["Title"] = "Assignment Page";
+    Layout = "";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="~/Content/uploadbtnstyle.css" rel="stylesheet" />
+    <link href="~/Content/style.css" rel="stylesheet" />
+    <script src="~/Content/main.js"></script>
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <div class="body">
+        <div class="veen">
+            <div class="login-btn splits">
+                <p>Assignment 2C2P</p>
+                @*<button class="active" id="#upload-btn">Upload File</button>*@
+                <input type="file" id="upload-file" accept=".csv,.xml" style="display:none">
+                <button for="file-input" onclick="uploadFiles('files');">Upload file...</button>
+            </div>
+            <div class="rgstr-btn splits">
+                <p>Don't have an account?</p>
+                <button>Register</button>
+            </div>
+            <div class="wrapper">
+                <form id="login" tabindex="500">
+                    <h3>Result View</h3>
+                    <div class="submit">
+                        <p id="result"></p>
+                    </div>
+                    <div class="submit">
+                        <p id="StatusCode"></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <style type="text/css">
+        .site-link {
+            padding: 5px 15px;
+            position: fixed;
+            z-index: 99999;
+            background: #fff;
+            box-shadow: 0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28);
+            right: 30px;
+            bottom: 30px;
+            border-radius: 10px;
+        }
+
+            .site-link img {
+                width: 30px;
+                height: 30px;
+            }
+    </style>
+    <script type="text/javascript">
+
+        function uploadFiles(inputId) {
+            $('#upload-file').click();
+        }
+
+        $('#upload-file').change(function () {
+            var formData = new FormData();
+            var files = $("#upload-file").get(0).files;
+            if (files.length > 0) {
+                formData.append("file", files[0]);
+            }
+            if (!checkFile(files)) return;
+            $.ajax(
+                {
+                    url: "Assignment/upload",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    type: "POST",
+                    success: function (response) {
+                        //console.log(response);
+                        var txt = response.Response.RespDesp + "<br>";
+                        txt += JSON.stringify(response.lstResult); 
+                        $('#result').html(txt);
+                        $('#StatusCode').html("Status Code : " +response.Response.SuccessStatausCode);
+                        //$('#result').html(response.RespDesp);
+                        //$('#result').html(response.lstTransaction[0].Amount);
+
+                    }
+                }
+            );
+        });
+
+        function checkFile(files) {
+            if (files.length <= 0) return false;
+            var file = files[0];
+            var sFileName = file.name;
+            var sFileExtension = sFileName.split('.')[sFileName.split('.').length - 1].toLowerCase();
+            var iFileSize = file.size;
+            var iConvert = (file.size / 1048576).toFixed(2);
+            if (!(sFileExtension === "csv" ||
+                sFileExtension === "xml")) {
+                $('#result').html("Unknown format!" + "<br>" + "Please make sure your file must be csv or xml.");
+                return false;
+            }
+            else if (iConvert > 1) { /// 1 mb
+                $('#result').html("Please make sure your file is greater than 1 MB.");
+                return false;
+            }
+            $('#StatusCode').html("");
+            $('#result').html("");
+            return true;
+        }
+
+    </script>
+
+</body>
+</html>
